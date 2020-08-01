@@ -6,7 +6,7 @@ from pytube import YouTube, Playlist
 
 
 def download_video(url, dst):
-    yt = YouTube(url, dst)
+    yt = YouTube(url)
     yt.streams.get_highest_resolution().download(dst)
     print(f'downloaded {yt.title}')
 
@@ -29,7 +29,7 @@ def main():
             raise Exception('Filename required for Instagram videos')
             
         gram = Instagram(args.link)
-        gram.download(dst='queue', filename=args.name)
+        gram.download(dst=args.dst, filename=args.name)
         print(f'downloaded {args.link if len(args.name) == 0 else args.name}')
 
 if __name__ == '__main__':
