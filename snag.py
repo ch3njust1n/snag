@@ -44,7 +44,7 @@ def main():
     parser.add_argument('--link', '-l', type=str, required=True, help='YouTube or Instagram link. (required)')
     parser.add_argument('--name', '-n', type=str, default='', help='File name. Required for Instagram videos.')
     parser.add_argument('--dst', '-d', type=str, default='downloads', help='Save destination (default: downloads)')
-    parser.add_argument('--file', '-f', type=str, help='File of url to download')
+    parser.add_argument('--file', '-f', type=str, help='File of urls to download')
     args = parser.parse_args()
 
     if not os.path.exists(args.dst): 
