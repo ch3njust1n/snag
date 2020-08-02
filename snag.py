@@ -14,7 +14,7 @@ def download_video(url, dst):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--link', '-l', type=str, required=True, help='YouTube or Instagram link. (required)')
-    parser.add_argument('--name', '-n', type=str, help='File name. Required for Instagram videos.')
+    parser.add_argument('--name', '-n', type=str, default='', help='File name. Required for Instagram videos.')
     parser.add_argument('--dst', '-d', type=str, default='downloads', help='Save destination (default: downloads)')
     args = parser.parse_args()
 
