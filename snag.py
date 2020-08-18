@@ -11,12 +11,13 @@ def download(link, dst, name):
     if 'youtube' in link:
         if 'playlist' in link: Playlist(link).download_all(dst)
         else:
+            link = link.split('&')[0]
             yt = YouTube(link)
             yt.streams.get_highest_resolution().download(dst)
-            print(f'downloaded {yt.title}')
+            print(f'{Fore.GREEN}downloaded{Style.RESET_ALL} {yt.title}')
     elif 'instagram' in link:
         if len(name) == 0:
-            raise Exception('Filename required for Instagram videos')
+            raise Exception(f'{Fore.RED}failed{Style.RESET_ALL} Filename required for Instagram videos')
             
         gram = Instagram(link)
         gram.download(dst=dst, filename=name)
@@ -45,7 +46,13 @@ def main():
     parser.add_argument('--name', '-n', type=str, default='', help='File name. Required for Instagram videos.')
     parser.add_argument('--dst', '-d', type=str, default='downloads', help='Save destination (default: downloads)')
     parser.add_argument('--file', '-f', type=str, help='File of urls to download')
-    args = parser.parse_args()
+    
+    args = None
+
+    try:
+        args = parser.parse_args()
+    except:
+        raise Exception(f'{Fore.RED}failed{Style.RESET_ALL} could not parse arguments')
 
     if not os.path.exists(args.dst): 
         os.makedirs(args.dst)
