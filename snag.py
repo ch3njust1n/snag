@@ -44,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--link', '-l', type=str, required=True, help='YouTube or Instagram link. (required)')
     parser.add_argument('--name', '-n', type=str, default='', help='File name. Required for Instagram videos.')
-    parser.add_argument('--dst', '-d', type=str, default='downloads', help='Save destination (default: downloads)')
+    parser.add_argument('--dst', '-d', type=str, default=os.path.expanduser('~/Downloads'), help='Save destination (default: downloads)')
     parser.add_argument('--file', '-f', type=str, help='File of urls to download')
     
     args = None
