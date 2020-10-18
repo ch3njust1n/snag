@@ -1,56 +1,8 @@
 import os
 import sys
 import argparse
-import pandas as pd
 from colorama import Fore, Style
-from pystagram import Instagram
-from pytube import YouTube, Playlist
-from tqdm import tqdm
-from datetime import datetime
-
-
-
-def download(link, dst, name, print_status=True):
-    if 'youtube' in link:
-        if 'playlist' in link: Playlist(link).download_all(dst)
-        else:
-            link = link.split('&')[0]
-            yt = YouTube(link)
-            yt.streams.get_highest_resolution().download(dst)
-            if print_status: print(f'{Fore.GREEN}downloaded{Style.RESET_ALL} {yt.title}')
-    elif 'instagram' in link:
-        if len(name) == 0:
-            raise Exception(f'{Fore.RED}failed{Style.RESET_ALL} Filename required for Instagram videos')
-            
-        gram = Instagram(link)
-        gram.download(dst=dst, filename=name)
-        if print_status: print(f'{Fore.GREEN}downloaded{Style.RESET_ALL} {link if len(name) == 0 else name}')
-
-
-def download_list(file, dst):
-    errors = []
-    if file.endswith('.txt'):
-        with open(file, 'r') as f:
-            for line in tqdm(f.readlines()):
-                line = line.strip()
-                name = line.split('/p/')[-1].split('/')[0]
-                try:
-                    download(line, dst, name, print_status=False)
-                except Exception as e:
-                    errors.append(line)
-    elif file.endswith('.tsv'):
-        df = pd.read_csv(file, header=0, sep='\t')
-
-        for i, row in df.iterrows():
-            if isinstance(row['link'], str) and len(row['link']) > 0:
-                save = row['channel']+'-'+row['embed'] if row['embed'] is None else row['channel']
-                download(row['link'], dst, save)
-            else:
-                print(f'{Fore.RED}{list(row)}')
-
-    print(f'{Fore.RED}{len(errors)} failed{Style.RESET_ALL}')
-    for url in errors:
-        print(url)
+from api.video import download_list, download
 
 
 def main():
@@ -74,10 +26,21 @@ def main():
         os.makedirs(args.dst)
 
     if args.file is None: 
-        download(args.link, args.dst, args.name)
-    else:
-        download_list(args.file, args.dst)
+        title = download(args.link, args.dst, args.name)
 
+        if len(title) > 0:
+            print(f'{Fore.GREEN}downloaded{Style.RESET_ALL} {title}')
+    else:
+        errors, successes = download_list(args.file, args.dst)
+        
+        if len(errors) > 0:
+            for url in errors:
+                print(url)
+            
+            print(f'{Fore.RED}{len(errors)}{Style.RESET_ALL} errors')
+        
+        print(f'{Fore.GREEN}{successes}{Style.RESET_ALL} downloaded')
+            
 
 if __name__ == '__main__':
     main()
