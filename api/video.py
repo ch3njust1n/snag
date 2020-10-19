@@ -2,6 +2,7 @@ import pandas as pd
 from pystagram import Instagram
 from pytube import YouTube, Playlist
 from tqdm import tqdm
+from colorama import Fore, Style
 
 '''
 inputs:
