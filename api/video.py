@@ -1,3 +1,5 @@
+import os
+import requests
 import pandas as pd
 from pystagram import Instagram
 from pytube import YouTube, Playlist
@@ -5,31 +7,55 @@ from tqdm import tqdm
 from colorama import Fore, Style
 
 '''
+'''
+def download_stream(url, dst, title, extension):
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        with open(os.path.join(dst, f'{title}.{extension}'), 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+'''
 inputs:
-link         (str) URL to video
-dst          (str) Download directory
-name         (str) User given name of video
+link         (str)           URL to video
+dst          (str)           Download directory
+name         (str)           User given name of video
+quality      (str, optional) Video quality
+extension    (str, optional) Video extension type
 
 outputs:
 title (str) Video title or link if successful
 '''
-def download(link, dst, name):
+def download(link, dst, name, quality='medium', extension='mp4'):
     title = ''
+    qualities = {'tiny', 'small', 'medium', 'large', 'hd720', 'hd1080'}
+    
+    if not quality in qualities:
+        raise Exception(f'Invalid quality given: {quality}')
 
     if 'youtube' in link:
         if 'playlist' in link: 
             try:
                 Playlist(link).download_all(dst)
             except:
-                pass
+                return title
         else:
             link = link.split('&')[0]
             try:
                 yt = YouTube(link)
-                yt.streams.get_highest_resolution().download(dst)
-                title = yt.title
-            except:
-                pass
+                stream = yt.streams.get_highest_resolution()
+                video_streams = stream.player_config_args['url_encoded_fmt_stream_map']
+
+                for vid in video_streams:
+                    ext = vid['type'].split(';')[0].split('/')[-1]
+
+                    if ext == extension and vid['quality'] == quality:
+                        download_stream(vid['url'], dst, yt.title, extension)
+                        return yt.title
+
+            except Exception as e:
+                print(e)
+                return title
 
     elif 'instagram' in link:
         if len(name) == 0:
@@ -40,7 +66,7 @@ def download(link, dst, name):
             gram.download(dst=dst, filename=name)  
             title = link if len(name) == 0 else name
         except:
-            pass
+            return title
 
     else:
         raise Exception('snag api only supports YouTube and Instagram videos')
