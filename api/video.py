@@ -7,13 +7,24 @@ from tqdm import tqdm
 from colorama import Fore, Style
 
 '''
+inputs:
+url       (str)           URL to video
+dst       (str)           Download directory
+title     (str)           File name
+extension (str, optional) File extension. Default: mp4
+
+outputs:
+out_file (str) Absolute path to saved file
 '''
 def download_stream(url, dst, title, extension):
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        with open(os.path.join(dst, f'{title}.{extension}'), 'wb') as f:
+        out_file = os.path.join(dst, f'{title}.{extension}')
+        with open(out_file, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
+
+            return out_file
 
 '''
 inputs:
@@ -24,7 +35,8 @@ quality      (str, optional) Video quality
 extension    (str, optional) Video extension type
 
 outputs:
-title (str) Video title or link if successful
+title     (str) Video title or link if successful
+save_path (str) Absolute path to saved file
 '''
 def download(link, dst, name, quality='medium', extension='mp4'):
     title = ''
@@ -38,7 +50,7 @@ def download(link, dst, name, quality='medium', extension='mp4'):
             try:
                 Playlist(link).download_all(dst)
             except:
-                return title
+                return title, ''
         else:
             link = link.split('&')[0]
             try:
@@ -50,12 +62,12 @@ def download(link, dst, name, quality='medium', extension='mp4'):
                     ext = vid['type'].split(';')[0].split('/')[-1]
 
                     if ext == extension and vid['quality'] == quality:
-                        download_stream(vid['url'], dst, yt.title, extension)
-                        return yt.title
+                        save_path = download_stream(vid['url'], dst, yt.title, extension)
+                        return yt.title, save_path
 
             except Exception as e:
                 print(e)
-                return title
+                return title, ''
 
     elif 'instagram' in link:
         if len(name) == 0:

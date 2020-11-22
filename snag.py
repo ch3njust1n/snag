@@ -3,6 +3,7 @@ import sys
 import argparse
 from colorama import Fore, Style
 from api.video import download_list, download
+from api.audio import mp4_to_wav
 
 
 def main():
@@ -11,8 +12,9 @@ def main():
     parser.add_argument('--name', '-n', type=str, default='', help='File name. Required for Instagram videos.')
     parser.add_argument('--dst', '-d', type=str, default=os.path.expanduser('~/Downloads'), help='Save destination (default: downloads)')
     parser.add_argument('--file', '-f', type=str, help='File of urls to download')
-    parser.add_argument('--quality', '-q', type=str, default='medium' help='Video quality (default: medium)')
-    parser.add_argument('--extension', '-e', type=str, default='mp4' help='Video extension (default: mp4)')
+    parser.add_argument('--quality', '-q', type=str, default='medium', help='Video quality (default: medium)')
+    parser.add_argument('--extension', '-e', type=str, default='mp4', help='Video extension (default: mp4)')
+    parser.add_argument('--audio', '-mp3', action='store_true', help='Set to extract audio from video')
     
     args = None
 
@@ -28,7 +30,8 @@ def main():
         os.makedirs(args.dst)
 
     if args.file is None: 
-        title = download(args.link, args.dst, args.name, args.quality, args.extension)
+        title, filename = download(args.link, args.dst, args.name, args.quality, args.extension)
+        if args.audio and len(filename) > 0: mp4_to_wav(filename, args.dst)
 
         if len(title) > 0:
             print(f'{Fore.GREEN}downloaded{Style.RESET_ALL} {title}')
