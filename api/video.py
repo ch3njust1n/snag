@@ -78,12 +78,12 @@ def download(link, dst, name, quality='medium', extension='mp4'):
             gram.download(dst=dst, filename=name)  
             title = link if len(name) == 0 else name
         except:
-            return title
+            return title, os.path.join(dst, name)
 
     else:
         raise Exception('snag api only supports YouTube and Instagram videos')
 
-    return title
+    return title, ''
 
 '''
 inputs
